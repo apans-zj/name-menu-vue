@@ -243,13 +243,16 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        let paramData = this.qs.stringify({
+    /*    let paramData = this.qs.stringify({
           id: row.id
-        })
+        })*/
+        let paramData = {
+          id: row.id
+        }
         this.axios({
           // method: 'post',
           method: 'delete',
-          url: 'nameMenu/delete/',
+          url: baseUrl + 'nameMenu/delete/',
           params: paramData
         }).then(response => {
           this.currentPage = 1
@@ -307,24 +310,32 @@ export default {
         // id: '',
         fatherName: '',
         name: '',
-        sex: '',
+        // sex: '',
         createDate: '',
         updateDate: '',
         parentId: ''
       }
     },
     addNameMenu () {
-      let postData = this.qs.stringify({
+/*      let postData = this.qs.stringify({
         userDate: this.ruleForm.userDate,
         fatherName: this.ruleForm.fatherName,
         name: this.ruleForm.name,
         sex: this.ruleForm.sex
         // createDate: this.ruleForm.createDate,
         // updateDate: this.ruleForm.updateDate
-      })
+      })*/
+      let postData = {
+        userDate: this.ruleForm.userDate,
+        fatherName: this.ruleForm.fatherName,
+        name: this.ruleForm.name,
+        sex: this.ruleForm.sex
+        // createDate: this.ruleForm.createDate,
+        // updateDate: this.ruleForm.updateDate
+      }
       this.axios({
         method: 'post',
-        url: '/nameMenu/add',
+        url: baseUrl + '/nameMenu/add',
         data: postData
       }).then(response => {
         /* this.axios.post('/page').then(response => {
@@ -351,15 +362,21 @@ export default {
       })
     },
     updateNameMenu () {
-      let postData = this.qs.stringify({
+/*      let postData = this.qs.stringify({
         id: this.ruleForm.id,
         fatherName: this.ruleForm.fatherName,
         sex: this.ruleForm.sex,
         parentId: this.ruleForm.parentId
-      })
+      })*/
+      let postData = {
+        id: this.ruleForm.id,
+        fatherName: this.ruleForm.fatherName,
+        sex: this.ruleForm.sex,
+        parentId: this.ruleForm.parentId
+      }
       this.axios({
         method: 'put',
-        url: '/nameMenu/update',
+        url: baseUrl + '/nameMenu/update',
         data: postData
       }).then(response => {
         // this.handleCurrentChange()
@@ -379,15 +396,21 @@ export default {
       })
     },
     onSearch () {
-      let getData = this.qs.stringify({
+ /*     let getData = this.qs.stringify({
         name: this.search
-      })
+      })*/
+      let getData = {
+        name: this.search
+      }
       this.axios({
         method: 'get',
-        url: '/nameMenu/queryLike',
+        url: baseUrl + '/nameMenu/queryLike',
         params: getData
       }).then(response => {
-        this.tableData = response.data
+       /* this.tableData = response.data.data.list
+        this.disablePage = true*/
+        this.tableData = response.data.data.list
+        this.total = response.data.data.total
         this.disablePage = true
       }).catch(error => {
         console.log(error)
@@ -423,8 +446,8 @@ export default {
           'Content-Type': 'application/json'
         }
       }).then(response => {
-        this.tableData = response.data.list
-        this.total = response.data.total
+        this.tableData = response.data.data.list
+        this.total = response.data.data.total
         this.disablePage = true
       }).catch(error => {
         console.log(error)
