@@ -134,7 +134,7 @@
 
         <span slot="footer" class="dialog-footer">
             <el-button @click="cancel()" size="medium">取 消</el-button>
-            <el-button @click="addNameMenu()" type="primary" size="medium">确 定</el-button>
+            <el-button @click="addNameMenu('ruleForm')" type="primary" size="medium">确 定</el-button>
           </span>
       </el-dialog>
     </el-form>
@@ -187,7 +187,7 @@
 </template>
 
 <script>
-  let baseUrl = "http://localhost:8081";
+let baseUrl = 'http://localhost:8081'
 export default {
   data () {
     return {
@@ -202,7 +202,10 @@ export default {
       },
       rules: {
         fatherName: [
-          { required: true, message: '请输入父亲姓名', trigger: 'blur' },
+          { required: true,
+            message: '请输入父亲姓名',
+            trigger: 'blur'
+          },
           { min: 2, max: 7, message: '长度在 2 到 7 个字符', trigger: 'blur' }
         ],
         name: [
@@ -222,10 +225,10 @@ export default {
       search: '',
       dialogVisible: false,
       dialogUpdate: false,
-      pageSize: 5,
+      pageSize: 1,
       currentPage: 1,
       total: 0,
-      disablePage: false
+      disablePage: true
     }
   },
   methods: {
@@ -243,9 +246,10 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-    /*    let paramData = this.qs.stringify({
+      /* let paramData = this.qs.stringify({
           id: row.id
-        })*/
+        })
+        */
         let paramData = {
           id: row.id
         }
@@ -316,50 +320,48 @@ export default {
         parentId: ''
       }
     },
-    addNameMenu () {
-/*      let postData = this.qs.stringify({
-        userDate: this.ruleForm.userDate,
-        fatherName: this.ruleForm.fatherName,
-        name: this.ruleForm.name,
-        sex: this.ruleForm.sex
-        // createDate: this.ruleForm.createDate,
-        // updateDate: this.ruleForm.updateDate
-      })*/
-      let postData = {
-        userDate: this.ruleForm.userDate,
-        fatherName: this.ruleForm.fatherName,
-        name: this.ruleForm.name,
-        sex: this.ruleForm.sex
-        // createDate: this.ruleForm.createDate,
-        // updateDate: this.ruleForm.updateDate
-      }
-      this.axios({
-        method: 'post',
-        url: baseUrl + '/nameMenu/add',
-        data: postData
-      }).then(response => {
-        /* this.axios.post('/page').then(response => {
-          this.tableData = response.data
-          this.currentPage = 1
-          this.$message({
-            type: 'success',
-            message: '添加成功!'
+      addNameMenu (ruleForm) {
+        // this.$refs['ruleForm1'].validate
+        this.$refs[ruleForm].validate((valid) => {
+        if (valid){
+          let postData = {
+            userDate: this.ruleForm.userDate,
+            fatherName: this.ruleForm.fatherName,
+            name: this.ruleForm.name,
+            sex: this.ruleForm.sex
+            // createDate: this.ruleForm.createDate,
+            // updateDate: this.ruleForm.updateDate
+          }
+          this.axios({
+            method: 'post',
+            url: baseUrl + '/nameMenu/add',
+            data: postData
+          }).then(response => {
+            console.log('t:' + response.data.code)
+            if (response.data.code !== 0){
+              this.$message({
+                type: 'fail',
+                message: '添加失败!' + response.data.msg
+              })
+            }else{
+              this.$message({
+                type: 'success',
+                message: '添加成功!'
+              })
+            }
+            this.currentPage = 1
+            this.queryByPage()
+
+            this.dialogVisible = false
+            console.log(response)
+          }).catch(error => {
+            console.log(error)
           })
-        }).catch(error => {
-          console.log(error)
-        }) */
-        // this.getPages()
-        this.currentPage = 1
-        this.queryByPage()
-        this.$message({
-          type: 'success',
-          message: '添加成功!'
-        })
-        this.dialogVisible = false
-        console.log(response)
-      }).catch(error => {
-        console.log(error)
-      })
+        } else { //校验不通过
+          this.$message.error("数据校验失败!,请验证你输入的数据正确性。")
+        }
+      });
+
     },
     updateNameMenu () {
 /*      let postData = this.qs.stringify({
@@ -367,7 +369,8 @@ export default {
         fatherName: this.ruleForm.fatherName,
         sex: this.ruleForm.sex,
         parentId: this.ruleForm.parentId
-      })*/
+      })
+      */
       let postData = {
         id: this.ruleForm.id,
         fatherName: this.ruleForm.fatherName,
@@ -395,26 +398,34 @@ export default {
         console.log(error)
       })
     },
-    onSearch () {
- /*     let getData = this.qs.stringify({
-        name: this.search
-      })*/
+    onSearch: function () {
+      this.currentPage = 1
+      this.queryByPage()
+/*
+      let pageNum = this.currentPage < 1 ? 1 : this.currentPage
+      let pageSize = this.pageSize < 1 ? 5 : this.pageSize
       let getData = {
-        name: this.search
+        name: this.search,
+        num: pageNum,
+        pageSize: this.pageSize
       }
       this.axios({
         method: 'get',
         url: baseUrl + '/nameMenu/queryLike',
         params: getData
       }).then(response => {
-       /* this.tableData = response.data.data.list
-        this.disablePage = true*/
+        /!* this.tableData = response.data.data.list
+         this.disablePage = true
+         *!/
+        console.log('yy:' + response.data.data)
         this.tableData = response.data.data.list
         this.total = response.data.data.total
-        this.disablePage = true
+        this.disablePage = false
+        console.log('this.disablePage:' + this.disablePage)
       }).catch(error => {
         console.log(error)
       })
+      */
     },
     /* getPages () {
       this.axios.post('/rows').then(response => {
@@ -422,36 +433,59 @@ export default {
       }).catch(error => {
         console.log(error)
       })
-    }, */
+    },
+    */
     refreshData () {
       location.reload()
     },
     queryByPage () {
-      let pageNum = this.currentPage < 1 ? 1 : this.currentPage
-      let pageSize = this.pageSize < 1 ? 5 : this.pageSize
-/*      let getData = this.qs.stringify({
-        num: pageNum,
-        pageSize: pageSize
-      })*/
-      let getData = {
-        num: pageNum,
-        pageSize: pageSize
-      }
-      this.axios({
-        method: 'get',
-        // url: 'http://localhost:8081/nameMenu/queryByPage',
-        url: baseUrl +  '/nameMenu/queryByPage',
-        params: getData,
-        headers: {
-          'Content-Type': 'application/json'
+      var name_ = this.search.trim().replace(/(^\s*)|(\s*$)/g, '');//去除空格;
+      // if(name_ !== '' || name_ !== null || name_ !== undefined){//模糊查询
+      // if("" !=name  || name_ !== null || name_ !== undefined){//模糊查询
+      //   console.log('name:' + name_)
+      //   this.onSearch()
+      // }else {//分页
+        // queryByPage()
+
+        let pageNum = this.currentPage < 1 ? 1 : this.currentPage
+        let pageSize = this.pageSize < 1 ? 5 : this.pageSize
+        /*      let getData = this.qs.stringify({
+                num: pageNum,
+                pageSize: pageSize
+              })
+              */
+        let getData = {
+          name: name_,
+          num: pageNum,
+          pageSize: pageSize
         }
-      }).then(response => {
-        this.tableData = response.data.data.list
-        this.total = response.data.data.total
-        this.disablePage = true
-      }).catch(error => {
-        console.log(error)
-      })
+        this.axios({
+          method: 'get',
+          // url: 'http://localhost:8081/nameMenu/queryByPage',
+          url: baseUrl +  '/nameMenu/queryByPage',
+          params: getData,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }).then(response => {
+          this.tableData = response.data.data.list
+          this.total = response.data.data.total
+          this.disablePage = false
+        }).catch(error => {
+          console.log(error)
+        })
+      // }
+
+    },
+
+    changeQueryPage(){
+      let name = this.search
+      if(name != null){
+        console.log('name:' + name)
+        this.onSearch()
+      }else {
+        queryByPage()
+      }
     }
   },
   created () {
