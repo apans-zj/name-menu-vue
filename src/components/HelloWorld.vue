@@ -108,7 +108,7 @@
       </el-table-column>
     </el-table>
 
-    <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="70px" class="demo-ruleForm" size="medium">
+    <el-form :model="ruleForm" :rules="rules" ref="ruleForm1" label-width="70px" class="demo-ruleForm" size="medium">
       <el-dialog
         title="添加"
         :append-to-body='true'
@@ -126,20 +126,22 @@
           <el-input v-model="ruleForm.name"></el-input>
         </el-form-item>
         <el-form-item label="性别：" prop="sex" size="mini" class='form-label' label-width="100px">
-          <el-radio-group v-mode="ruleForm.sex" @change="getRadioDate">
+          <el-radio-group v-model="ruleForm.sex" @change="getRadioDate">
             <el-radio :label="0" >男</el-radio>
             <el-radio :label="1" >女</el-radio>
           </el-radio-group>
+
+
         </el-form-item>
 
         <span slot="footer" class="dialog-footer">
             <el-button @click="cancel()" size="medium">取 消</el-button>
-            <el-button @click="addNameMenu('ruleForm')" type="primary" size="medium">确 定</el-button>
+            <el-button @click="addNameMenu()" type="primary" size="medium">确 定</el-button>
           </span>
       </el-dialog>
     </el-form>
 
-    <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="70px" class="demo-ruleForm" size="medium">
+    <el-form :model="ruleForm" :rules="rules" ref="ruleForm2" label-width="70px" class="demo-ruleForm" size="medium">
       <el-dialog
         title="编辑"
         :append-to-body='true'
@@ -158,7 +160,7 @@
           <el-input v-model="ruleForm.name"></el-input>
         </el-form-item>
         <el-form-item label="性别：" prop="sex" size="mini" class='form-label' label-width="100px">
-          <el-radio-group v-mode="ruleForm.sex" @change="getRadioDate">
+          <el-radio-group v-model="ruleForm.sex" @change="getRadioDate">
             <el-radio :label="0" >男</el-radio>
             <el-radio :label="1" >女</el-radio>
           </el-radio-group>
@@ -232,8 +234,8 @@ export default {
     }
   },
   methods: {
-    getRadioDate: function (val) {
-      console.log('获得单选框值是：', val, typeof val)
+    getRadioDate(val) {
+      console.log('获得单选框值是：'+ val)
     },
     handleEdit (index, row) {
       this.dialogUpdate = true
@@ -246,31 +248,30 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-      /* let paramData = this.qs.stringify({
-          id: row.id
-        })
-        */
         let paramData = {
           id: row.id
         }
         this.axios({
           // method: 'post',
           method: 'delete',
-          url: baseUrl + 'nameMenu/delete/',
+          url: baseUrl + '/nameMenu/delete',
           params: paramData
         }).then(response => {
+          console.log("then")
+          if (response.data.code !== 0){
+            this.$message({
+              type: 'fail',
+              message: '删除失败!' + response.data.msg
+            })
+          }else{
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+          }
           this.currentPage = 1
           // this.getPages()
           this.queryByPage()
-          /* this.axios.post('/page').then(response => {
-            this.tableData = response.data
-          }).catch(error => {
-            console.log(error)
-          }) */
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          })
           console.log(response)
         }).catch(error => {
           console.log(error)
@@ -289,40 +290,32 @@ export default {
         })
         .catch(_ => {})
     },
-    /* handleCurrentChange () {
-      console.log(`当前页: ${this.currentPage}`)
-      let postData = this.qs.stringify({
-        page: this.currentPage
-      })
-      this.axios({
-        method: 'get',
-        url: '/page',
-        data: postData
-      }).then(response => {
-        this.tableData = response.data
-      }).catch(error => {
-        console.log(error)
-      })
-    }, */
     cancel () {
       this.dialogUpdate = false
       this.dialogVisible = false
       this.emptyNameMenData()
     },
     emptyNameMenData () {
-      this.ruleForm = {
-        // id: '',
-        fatherName: '',
-        name: '',
-        // sex: '',
-        createDate: '',
-        updateDate: '',
-        parentId: ''
-      }
+      // this.ruleForm = {
+      //   id: '',
+      //   fatherName: '',
+      //   name: '',
+      //   sex: 0,
+      //   createDate: '',
+      //   updateDate: '',
+      //   parentId: ''
+      // }
+      this.ruleForm.id=''
+        this.ruleForm.fatherName=''
+        this.ruleForm.name=''
+        this.ruleForm.sex=0
+        this.ruleForm.createDate=''
+        this.ruleForm.updateDate=''
+        this.ruleForm.parentId=''
     },
-      addNameMenu (ruleForm) {
+      addNameMenu () {
         // this.$refs['ruleForm1'].validate
-        this.$refs[ruleForm].validate((valid) => {
+        this.$refs.ruleForm1.validate((valid) => {
         if (valid){
           let postData = {
             userDate: this.ruleForm.userDate,
@@ -351,8 +344,8 @@ export default {
             }
             this.currentPage = 1
             this.queryByPage()
-
-            this.dialogVisible = false
+            this.cancel()
+            // this.dialogVisible = false
             console.log(response)
           }).catch(error => {
             console.log(error)
@@ -364,39 +357,48 @@ export default {
 
     },
     updateNameMenu () {
-/*      let postData = this.qs.stringify({
-        id: this.ruleForm.id,
-        fatherName: this.ruleForm.fatherName,
-        sex: this.ruleForm.sex,
-        parentId: this.ruleForm.parentId
-      })
-      */
-      let postData = {
-        id: this.ruleForm.id,
-        fatherName: this.ruleForm.fatherName,
-        sex: this.ruleForm.sex,
-        parentId: this.ruleForm.parentId
-      }
-      this.axios({
-        method: 'put',
-        url: baseUrl + '/nameMenu/update',
-        data: postData
-      }).then(response => {
-        // this.handleCurrentChange()
-        this.queryByPage()
-        this.cancel()
-        this.$message({
-          type: 'success',
-          message: '更新成功!'
-        })
-        console.log(response)
-      }).catch(error => {
-        this.$message({
-          type: 'success',
-          message: '更新失败!'
-        })
-        console.log(error)
-      })
+      this.$refs.ruleForm2.validate((valid) => {
+          if (valid){
+            let postData = {
+              id: this.ruleForm.id,
+              fatherName: this.ruleForm.fatherName,
+              name: this.ruleForm.name,
+              sex: this.ruleForm.sex,
+              parentId: this.ruleForm.parentId
+            }
+            this.axios({
+              method: 'put',
+              url: baseUrl + '/nameMenu/update',
+              data: postData
+            }).then(response => {
+              console.log("l:"+ this.ruleForm.id)
+              // this.handleCurrentChange()
+              if (response.data.code !== 0){
+                this.$message({
+                  type: 'fail',
+                  message: '更新失败!'
+                })
+              }else {
+                this.$message({
+                  type: 'success',
+                  message: '更新成功!'
+                })
+              }
+              this.queryByPage()
+              this.cancel()
+              console.log(response)
+            }).catch(error => {
+              this.$message({
+                type: 'success',
+                message: '更新失败!'
+              })
+              console.log(error)
+            })
+          }else {//校验不通过
+            this.$message.error("数据校验失败!,请验证你输入的数据正确性。")
+          }
+      });
+
     },
     onSearch: function () {
       this.currentPage = 1
